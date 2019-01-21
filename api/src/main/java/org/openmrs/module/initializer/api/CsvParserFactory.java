@@ -8,6 +8,7 @@ import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.module.initializer.InitializerConstants;
 import org.openmrs.module.initializer.api.c.ConceptsCsvParser;
 import org.openmrs.module.initializer.api.drugs.DrugsCsvParser;
+import org.openmrs.module.initializer.api.encounters.EncountersCsvParser;
 import org.openmrs.module.initializer.api.freq.OrderFrequenciesCsvParser;
 import org.openmrs.module.initializer.api.idgen.IdentifierSourceCsvParser;
 import org.openmrs.module.initializer.api.loc.LocationsCsvParser;
@@ -31,7 +32,11 @@ public class CsvParserFactory {
 		if (InitializerConstants.DOMAIN_DRUGS.equals(domain)) {
 			return new DrugsCsvParser(is, Context.getConceptService());
 		}
-		
+
+		if (InitializerConstants.DOMAIN_ENC.equals(domain)) {
+			return new EncountersCsvParser(is, Context.getEncounterService());
+		}
+
 		if (InitializerConstants.DOMAIN_FREQ.equals(domain)) {
 			return new OrderFrequenciesCsvParser(is, Context.getOrderService());
 		}

@@ -106,6 +106,11 @@ public interface InitializerService extends OpenmrsService {
 	void loadEncounters();
 	
 	/**
+	 * Loads the observations from their domain import data dir, and saves them.
+	 */
+	void loadObservations();
+
+	/**
 	 * Fetches a value from the JSON key-value configuration.
 	 */
 	String getValueFromKey(String key);

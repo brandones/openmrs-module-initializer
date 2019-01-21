@@ -12,6 +12,7 @@ import org.openmrs.module.initializer.api.encounters.EncountersCsvParser;
 import org.openmrs.module.initializer.api.freq.OrderFrequenciesCsvParser;
 import org.openmrs.module.initializer.api.idgen.IdentifierSourceCsvParser;
 import org.openmrs.module.initializer.api.loc.LocationsCsvParser;
+import org.openmrs.module.initializer.api.obs.ObsCsvParser;
 import org.openmrs.module.initializer.api.patients.PatientsCsvParser;
 import org.openmrs.module.initializer.api.pat.PersonAttributeTypesCsvParser;
 import org.openmrs.module.initializer.api.persons.PersonCsvParser;
@@ -44,7 +45,7 @@ public class CsvParserFactory {
 		if (InitializerConstants.DOMAIN_LOC.equals(domain)) {
 			return new LocationsCsvParser(is, Context.getLocationService());
 		}
-		
+
 		if (InitializerConstants.DOMAIN_PAT.equals(domain)) {
 			return new PersonAttributeTypesCsvParser(is, Context.getPersonService());
 		}
@@ -52,6 +53,10 @@ public class CsvParserFactory {
 		/* Import Data */
 		if (InitializerConstants.DOMAIN_ENC.equals(domain)) {
 			return new EncountersCsvParser(is, Context.getEncounterService());
+		}
+
+		if (InitializerConstants.DOMAIN_OBS.equals(domain)) {
+			return new ObsCsvParser(is, Context.getObsService());
 		}
 		
 		if (InitializerConstants.DOMAIN_PATIENTS.equals(domain)) {

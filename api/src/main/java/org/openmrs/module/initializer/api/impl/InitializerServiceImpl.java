@@ -210,7 +210,11 @@ public class InitializerServiceImpl extends BaseOpenmrsService implements Initia
 	/*
 	 * Data Loaders
 	 */
-	
+	@Override
+	public void loadObservations() {
+		ConfigDirUtil.loadCsvFiles(getDataDirPath(), getDataChecksumsDirPath(), InitializerConstants.DOMAIN_OBS);
+	}
+
 	@Override
 	public void loadPatients() {
 		ConfigDirUtil.loadCsvFiles(getDataDirPath(), getDataChecksumsDirPath(), InitializerConstants.DOMAIN_PATIENTS);

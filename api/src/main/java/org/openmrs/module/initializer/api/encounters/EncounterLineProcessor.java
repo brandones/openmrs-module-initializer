@@ -54,15 +54,24 @@ public class EncounterLineProcessor extends BaseLineProcessor<Encounter, Encount
 		PatientService ps = Context.getPatientService();
 		String ptUuid = line.getString(HEADER_PT_UUID);
 		Patient pt = ps.getPatientByUuid(ptUuid);
+		if (pt == null) {
+			throw new IllegalArgumentException("No patient exists with UUID " + ptUuid);
+		}
 		enc.setPatient(pt);
 
 		LocationService ls = Context.getLocationService();
 		String locationString = line.getString(HEADER_LOCATION);
 		Location loc = ls.getLocation(locationString);
+		if (loc == null) {
+			throw new IllegalArgumentException("No location named " + locationString + " exists");
+		}
 		enc.setLocation(loc);
 
 		String encounterTypeString = line.getString(HEADER_ENCOUNTER_TYPE);
 		EncounterType et = service.getEncounterType(encounterTypeString);
+		if (et == null) {
+			throw new IllegalArgumentException("No Encounter Type named " + encounterTypeString + " exists");
+		}
 		enc.setEncounterType(et);
 
 		return enc;

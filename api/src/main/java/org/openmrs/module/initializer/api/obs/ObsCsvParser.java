@@ -12,15 +12,15 @@ public class ObsCsvParser extends CsvParser<Obs, ObsService, ObsLineProcessor> {
 
 	private static final String OBS_CHANGE_MESSAGE = "Initializer";
 
-	public ObsCsvParser(InputStream is, ObsService es) throws IOException {
-		super(is, es);
+	public ObsCsvParser(InputStream is, ObsService os) throws IOException {
+		super(is, os);
 	}
 	
 	@Override
 	protected Obs save(Obs instance) {
-		return service.saveObs(instance, OBS_CHANGE_MESSAGE);
+        return service.saveObs(instance, OBS_CHANGE_MESSAGE);
 	}
-	
+
 	@Override
 	protected boolean isVoidedOrRetired(Obs instance) {
 		return instance.getVoided();

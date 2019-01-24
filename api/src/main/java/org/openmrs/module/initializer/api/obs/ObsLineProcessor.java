@@ -23,13 +23,19 @@ import java.util.Date;
 public class ObsLineProcessor extends BaseLineProcessor<Obs, ObsService> {
 	
 	public static final String HEADER_DATE = "Date";
+	
 	public static final String HEADER_PERSON_UUID = "Person UUID";
+	
 	public static final String HEADER_LOCATION = "Location";
+	
 	public static final String HEADER_ENCOUNTER_UUID = "Encounter UUID";
+	
 	public static final String HEADER_CONCEPT_REFERENCE_TERM = "Concept Reference Term";
+	
 	public static final String HEADER_CONCEPT_NAME = "Concept Name";
+	
 	public static final String HEADER_VALUE = "Value";
-
+	
 	public ObsLineProcessor(String[] headerLine, ObsService es) {
 		super(headerLine, es);
 	}
@@ -54,46 +60,44 @@ public class ObsLineProcessor extends BaseLineProcessor<Obs, ObsService> {
 	@Override
 	protected Obs fill(Obs obs, CsvLine line) throws IllegalArgumentException {
 		EncounterService es = Context.getEncounterService();
-		Encounter enc = es.getEncounterByUuid(line.get(HEADER_ENCOUNTER_UUID));
-		obs.setEncounter(enc);  // allowed to be null
-
-		DateTimeFormatter parser = ISODateTimeFormat.dateTimeNoMillis();
-        String dateString = line.get(HEADER_DATE);
-        if (dateString != null && !dateString.isEmpty()) {
-			Date date = parser.parseDateTime(dateString).toDate();
-			obs.setObsDatetime(date);
-        } else if (enc != null) {
-        	obs.setObsDatetime(enc.getEncounterDatetime());
-        } else {
-			throw new IllegalArgumentException("Either " + HEADER_DATE + " or " + HEADER_ENCOUNTER_UUID + " are required.");
+		String encounterUuid = line.get(HEADER_ENCOUNTER_UUID);
+		Encounter enc = null;
+		if (encounterUuid != null && !encounterUuid.isEmpty()) {
+			enc = es.getEncounterByUuid(encounterUuid);
+			if (enc == null) {
+				throw new IllegalArgumentException("Invalid " + HEADER_ENCOUNTER_UUID);
+			} else {
+				obs.setEncounter(enc);
+			}
 		}
-
-        String personUuidString = line.get(HEADER_PERSON_UUID);
-        Person person;
-		if (personUuidString != null && !personUuidString.isEmpty()) {
-			PersonService ps = Context.getPersonService();
-			person = ps.getPersonByUuid(personUuidString);
-		} else {
-			person = enc.getPatient();
+		
+		Date date = getAndParseDate(line);
+		if (date == null) {
+			date = dateFromEncounter(enc);
+		}
+		if (date == null) {
+			throwBadHeader(HEADER_DATE);
+		}
+		obs.setObsDatetime(date);
+		
+		Person person = getPerson(line);
+		if (person == null) {
+			person = personFromEncounter(enc);
 		}
 		if (person == null) {
-			throw new IllegalArgumentException("Invalid patient from either Encounter or " + HEADER_PERSON_UUID);
+			throwBadHeader(HEADER_PERSON_UUID);
 		}
 		obs.setPerson(person);
-
-		String locString = line.get(HEADER_LOCATION);
-		Location loc;
-		if (locString != null && !locString.isEmpty()) {
-			LocationService ls = Context.getLocationService();
-			loc = ls.getLocation(locString);
-		} else {
-			loc = enc.getLocation();
+		
+		Location loc = getLocation(line);
+		if (loc == null) {
+			loc = locationFromEncounter(enc);
 		}
 		if (loc == null) {
-			throw new IllegalArgumentException("Invalid location from either Encounter or " + HEADER_LOCATION);
+			throwBadHeader(HEADER_LOCATION);
 		}
 		obs.setLocation(loc);
-
+		
 		String conceptRefTerm = line.get(HEADER_CONCEPT_REFERENCE_TERM);
 		String conceptName = line.get(HEADER_CONCEPT_NAME);
 		ConceptService cs = Context.getConceptService();
@@ -108,27 +112,28 @@ public class ObsLineProcessor extends BaseLineProcessor<Obs, ObsService> {
 			if (termSourceAndTerm.length != 2) {
 				throw new IllegalArgumentException("Concept Reference Terms should be specified like 'Term Source:Code'");
 			} else {
-			    c = cs.getConceptByMapping(termSourceAndTerm[1], termSourceAndTerm[0]);
+				c = cs.getConceptByMapping(termSourceAndTerm[1], termSourceAndTerm[0]);
 				if (c == null) {
 					throw new IllegalArgumentException("Invalid " + HEADER_CONCEPT_REFERENCE_TERM);
 				}
 			}
 		} else {
 			throw new IllegalArgumentException(String.format("Concept must be specified, either by %s or %s",
-					HEADER_CONCEPT_NAME, HEADER_CONCEPT_REFERENCE_TERM));
+			    HEADER_CONCEPT_NAME, HEADER_CONCEPT_REFERENCE_TERM));
 		}
 		obs.setConcept(c);
-
+		
 		ConceptDatatype datatype = c.getDatatype();
 		if (datatype.isBoolean()) {
-		    Boolean value = line.getBool(HEADER_VALUE);
-		    obs.setValueBoolean(value);
+			Boolean value = line.getBool(HEADER_VALUE);
+			obs.setValueBoolean(value);
 		} else if (datatype.isCoded()) {
 			String value = line.get(HEADER_VALUE);
 			Concept answer = cs.getConceptByName(value);
 			obs.setValueCoded(answer);
 		} else if (datatype.isDate() || datatype.isDateTime() || datatype.isTime()) {
 			String valueString = line.get(HEADER_VALUE);
+			DateTimeFormatter parser = ISODateTimeFormat.dateTimeNoMillis();
 			Date value = parser.parseDateTime(valueString).toDate();
 			obs.setValueDatetime(value);
 		} else if (datatype.isNumeric()) {
@@ -138,8 +143,69 @@ public class ObsLineProcessor extends BaseLineProcessor<Obs, ObsService> {
 			String value = line.get(HEADER_VALUE);
 			obs.setValueText(value);
 		} // do nothing if datatype.isAnswerOnly()
-
-	    return obs;
+		
+		return obs;
+	}
+	
+	private void throwBadHeader(String headerName) throws IllegalArgumentException {
+		throw new IllegalArgumentException("Either " + headerName + " or " + HEADER_ENCOUNTER_UUID + " are required.");
+	}
+	
+	private Date getAndParseDate(CsvLine line) throws IllegalArgumentException {
+		DateTimeFormatter parser = ISODateTimeFormat.dateTimeNoMillis();
+		String dateString = line.get(HEADER_DATE);
+		if (dateString != null && !dateString.isEmpty()) {
+			return parser.parseDateTime(dateString).toDate();
+		}
+		return null;
+	}
+	
+	private Date dateFromEncounter(Encounter enc) {
+		if (enc != null) {
+			return enc.getEncounterDatetime();
+		}
+		return null;
+	}
+	
+	private Person getPerson(CsvLine line) throws IllegalArgumentException {
+		String personUuidString = line.get(HEADER_PERSON_UUID);
+		if (personUuidString != null && !personUuidString.isEmpty()) {
+			PersonService ps = Context.getPersonService();
+			Person person = ps.getPersonByUuid(personUuidString);
+			if (person == null) {
+				throw new IllegalArgumentException("Invalid patient from " + HEADER_PERSON_UUID);
+			}
+			return person;
+		} else {
+			return null;
+		}
+	}
+	
+	private Person personFromEncounter(Encounter enc) {
+		if (enc != null) {
+			return enc.getPatient();
+		}
+		return null;
+	}
+	
+	private Location getLocation(CsvLine line) {
+		String locString = line.get(HEADER_LOCATION);
+		if (locString != null && !locString.isEmpty()) {
+			LocationService ls = Context.getLocationService();
+			Location loc = ls.getLocation(locString);
+			if (loc == null) {
+				throw new IllegalArgumentException("Invalid location from " + HEADER_LOCATION);
+			}
+			return loc;
+		}
+		return null;
+	}
+	
+	private Location locationFromEncounter(Encounter enc) {
+		if (enc != null) {
+			return enc.getLocation();
+		}
+		return null;
 	}
 	
 }

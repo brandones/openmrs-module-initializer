@@ -212,9 +212,13 @@ public class InitializerServiceImpl extends BaseOpenmrsService implements Initia
 	 */
 	@Override
 	public void loadObservations() {
+		double startTimeS = System.nanoTime() / 10E8;
 		ConfigDirUtil.loadCsvFiles(getDataDirPath(), getDataChecksumsDirPath(), InitializerConstants.DOMAIN_OBS);
+		double endTimeS = System.nanoTime() / 10E8;
+		double runTimeS = endTimeS - startTimeS;
+		log.warn("INIZ Loader: Obs took " + runTimeS + " s");
 	}
-
+	
 	@Override
 	public void loadPatients() {
 		ConfigDirUtil.loadCsvFiles(getDataDirPath(), getDataChecksumsDirPath(), InitializerConstants.DOMAIN_PATIENTS);

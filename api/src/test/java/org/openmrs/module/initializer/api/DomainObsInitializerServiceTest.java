@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-
 public class DomainObsInitializerServiceTest extends DomainBaseModuleContextSensitiveTest {
 	
 	@Autowired
@@ -51,24 +50,27 @@ public class DomainObsInitializerServiceTest extends DomainBaseModuleContextSens
 		LocationService ls = Context.getLocationService();
 		PatientService ps = Context.getPatientService();
 		ConceptService cs = Context.getConceptService();
-
+		
 		Patient pt = ps.getPatient(2);
 		Location xanadu = ls.getLocation("Xanadu");
 		Concept booleanConcept = cs.getConcept(18);
-
+		
 		// an obs to edit
-        // NB: obs are special because obsService doesn't update existing obs rows with new data.
-		//     Rather, it voids the old row and creates a new row. The new row has a new UUID. Thus,
-		//	   while we "edit" the obs by referring to it by UUID in the CSV file, we have to look
-		//     it up later by other means.
+		// NB: obs are special because obsService doesn't update existing obs rows with
+		// new data.
+		// Rather, it voids the old row and creates a new row. The new row has a new
+		// UUID. Thus,
+		// while we "edit" the obs by referring to it by UUID in the CSV file, we have
+		// to look
+		// it up later by other means.
 		{
-		    Date dt = new DateTime(2018, 3, 1, 12, 0, 0, DateTimeZone.UTC).toDate();
-		    Obs o = new Obs(pt, booleanConcept, dt, xanadu);
-		    o.setUuid("afc94d43-3aa8-4724-809f-4934b1df3c7b");
-		    o.setValueBoolean(true);
-		    os.saveObs(o, "Obs to edit");
+			Date dt = new DateTime(2018, 3, 1, 12, 0, 0, DateTimeZone.UTC).toDate();
+			Obs o = new Obs(pt, booleanConcept, dt, xanadu);
+			o.setUuid("afc94d43-3aa8-4724-809f-4934b1df3c7b");
+			o.setValueBoolean(true);
+			os.saveObs(o, "Obs to edit");
 		}
-
+		
 		// an obs to void
 		{
 			Date dt = new DateTime(2018, 4, 1, 12, 0, 0, DateTimeZone.UTC).toDate();
@@ -84,14 +86,14 @@ public class DomainObsInitializerServiceTest extends DomainBaseModuleContextSens
 		
 		// Replay
 		getService().loadObservations();
-
+		
 		LocationService ls = Context.getLocationService();
 		PatientService ps = Context.getPatientService();
 		EncounterService es = Context.getEncounterService();
 		ConceptService cs = Context.getConceptService();
-
+		
 		Location xanadu = ls.getLocation("Xanadu");
-
+		
 		// Verify creation of a numeric obs, from concept ref term, with encounter
 		{
 			Obs o = os.getObsByUuid("5a1634a5-ef99-48e3-919e-fcf2e6464ee3");
@@ -115,12 +117,13 @@ public class DomainObsInitializerServiceTest extends DomainBaseModuleContextSens
 			Assert.assertEquals((Integer) 18, o.getConcept().getId());
 			Assert.assertEquals(false, o.getValueBoolean());
 		}
-		// Verify creation of a coded obs, person, location, and date inherited from encounter
+		// Verify creation of a coded obs, person, location, and date inherited from
+		// encounter
 		{
 			Obs o = os.getObsByUuid("9fd15da4-27e6-43c7-a3cf-c718997926f4");
 			Assert.assertNotNull(o);
 			Assert.assertEquals(es.getEncounterByUuid("6519d653-393b-4118-9c83-a3715b82d4ac"), o.getEncounter());
-			Date dt = new DateTime(2008, 8, 1, 0, 0, 0).toDate();  // standardTestDataset times are local time
+			Date dt = new DateTime(2008, 8, 1, 0, 0, 0).toDate(); // standardTestDataset times are local time
 			Assert.assertEquals(dt, new Date(o.getObsDatetime().getTime()));
 			Assert.assertEquals(ps.getPatient(7), o.getPerson());
 			Assert.assertEquals(ls.getLocation("Unknown Location"), o.getLocation());
@@ -153,11 +156,9 @@ public class DomainObsInitializerServiceTest extends DomainBaseModuleContextSens
 		}
 		// Verify edit
 		{
-			List<Obs> editObsMatches = os.getObservations(
-					Arrays.asList((Person) ps.getPatient(7)),
-					Arrays.asList(es.getEncounterByUuid("6519d653-393b-4118-9c83-a3715b82d4ac")),
-					Arrays.asList(cs.getConcept(18)),
-					null, null, null, null, null, null, null, null, false);
+			List<Obs> editObsMatches = os.getObservations(Arrays.asList((Person) ps.getPatient(7)),
+			    Arrays.asList(es.getEncounterByUuid("6519d653-393b-4118-9c83-a3715b82d4ac")),
+			    Arrays.asList(cs.getConcept(18)), null, null, null, null, null, null, null, null, false);
 			Assert.assertEquals(1, editObsMatches.size());
 			Obs o = editObsMatches.get(0);
 			Assert.assertEquals(false, o.getValueBoolean());

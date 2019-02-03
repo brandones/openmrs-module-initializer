@@ -41,8 +41,6 @@ public class InitializerConstants {
 	
 	public static final String DOMAIN_DRUGS = "drugs";
 
-	public static final String DOMAIN_ENC = "encounters";
-
 	public static final String DOMAIN_LOC = "locations";
 	
 	public static final String DOMAIN_FREQ = "orderfrequencies";
@@ -60,6 +58,8 @@ public class InitializerConstants {
 	/*
 	 * Import Data Domains
 	 */
+	public static final String DOMAIN_ENC = "encounters";
+
 	public static final String DOMAIN_PATIENTS = "patients";
 	
 	public static final String DOMAIN_PERSONS = "persons";

@@ -33,10 +33,6 @@ public class CsvParserFactory {
 			return new DrugsCsvParser(is, Context.getConceptService());
 		}
 
-		if (InitializerConstants.DOMAIN_ENC.equals(domain)) {
-			return new EncountersCsvParser(is, Context.getEncounterService());
-		}
-
 		if (InitializerConstants.DOMAIN_FREQ.equals(domain)) {
 			return new OrderFrequenciesCsvParser(is, Context.getOrderService());
 		}
@@ -54,6 +50,10 @@ public class CsvParserFactory {
 		}
 		
 		/* Import Data */
+		if (InitializerConstants.DOMAIN_ENC.equals(domain)) {
+			return new EncountersCsvParser(is, Context.getEncounterService());
+		}
+
 		if (InitializerConstants.DOMAIN_PATIENTS.equals(domain)) {
 			return new PatientsCsvParser(is, Context.getPatientService());
 		}

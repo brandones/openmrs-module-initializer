@@ -45,7 +45,7 @@ public class DomainEncountersInitializerServiceTest extends DomainBaseModuleCont
 	
 	@Override
 	protected String getDomain() {
-		return InitializerConstants.DOMAIN_P;
+		return InitializerConstants.DOMAIN_ENC;
 	}
 	
 	@Before

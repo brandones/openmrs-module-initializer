@@ -1,5 +1,6 @@
 package org.openmrs.module.initializer.api.obs;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -19,6 +20,7 @@ import org.openmrs.module.initializer.api.BaseLineProcessor;
 import org.openmrs.module.initializer.api.CsvLine;
 
 import java.util.Date;
+import java.util.UUID;
 
 public class ObsLineProcessor extends BaseLineProcessor<Obs, ObsService> {
 	
@@ -30,11 +32,13 @@ public class ObsLineProcessor extends BaseLineProcessor<Obs, ObsService> {
 	
 	public static final String HEADER_ENCOUNTER_UUID = "Encounter UUID";
 	
-	public static final String HEADER_CONCEPT_REFERENCE_TERM = "Concept Reference Term";
-	
-	public static final String HEADER_CONCEPT_NAME = "Concept Name";
+	public static final String HEADER_CONCEPT = "Concept";
 	
 	public static final String HEADER_VALUE = "Value";
+	
+	public static final String HEADER_SET_MEMBERS = "Set Members";
+	
+	public static final String HEADER_SET_MEMBER_VALUES = "Set Member Values";
 	
 	public ObsLineProcessor(String[] headerLine, ObsService es) {
 		super(headerLine, es);
@@ -43,18 +47,18 @@ public class ObsLineProcessor extends BaseLineProcessor<Obs, ObsService> {
 	@Override
 	protected Obs bootstrap(CsvLine line) throws IllegalArgumentException {
 		String uuid = getUuid(line.asLine());
-		Obs enc = service.getObsByUuid(uuid);
+		Obs obs = service.getObsByUuid(uuid);
 		
-		if (enc == null) {
-			enc = new Obs();
+		if (obs == null) {
+			obs = new Obs();
 			if (!StringUtils.isEmpty(uuid)) {
-				enc.setUuid(uuid);
+				obs.setUuid(uuid);
 			}
 		}
 		
-		enc.setVoided(getVoidOrRetire(line.asLine()));
+		obs.setVoided(getVoidOrRetire(line.asLine()));
 		
-		return enc;
+		return obs;
 	}
 	
 	@Override
@@ -98,57 +102,61 @@ public class ObsLineProcessor extends BaseLineProcessor<Obs, ObsService> {
 		}
 		obs.setLocation(loc);
 		
-		String conceptRefTerm = line.get(HEADER_CONCEPT_REFERENCE_TERM);
-		String conceptName = line.get(HEADER_CONCEPT_NAME);
 		ConceptService cs = Context.getConceptService();
-		Concept c;
-		if (conceptName != null) {
-			c = cs.getConceptByName(conceptName);
-			if (c == null) {
-				throw new IllegalArgumentException("Invalid " + HEADER_CONCEPT_NAME);
-			}
-		} else if (conceptRefTerm != null) {
-			String[] termSourceAndTerm = conceptRefTerm.split(":");
-			if (termSourceAndTerm.length != 2) {
-				throw new IllegalArgumentException("Concept Reference Terms should be specified like 'Term Source:Code'");
-			} else {
-				c = cs.getConceptByMapping(termSourceAndTerm[1], termSourceAndTerm[0]);
-				if (c == null) {
-					throw new IllegalArgumentException("Invalid " + HEADER_CONCEPT_REFERENCE_TERM);
-				}
-			}
-		} else {
-			throw new IllegalArgumentException(String.format("Concept must be specified, either by %s or %s",
-			    HEADER_CONCEPT_NAME, HEADER_CONCEPT_REFERENCE_TERM));
+		Concept c = lookupConcept(cs, line.get(HEADER_CONCEPT, true));
+		if (c == null) {
+			throw new IllegalArgumentException("Invalid " + HEADER_CONCEPT + ". Should be either a Concept Name "
+			        + "in the current preferred locale or a Concept Reference Term like 'CIEL:12345'");
 		}
 		obs.setConcept(c);
 		
-		ConceptDatatype datatype = c.getDatatype();
-		if (datatype.isBoolean()) {
-			Boolean value = line.getBool(HEADER_VALUE);
-			obs.setValueBoolean(value);
-		} else if (datatype.isCoded()) {
-			String value = line.get(HEADER_VALUE);
-			Concept answer = cs.getConceptByName(value);
-			obs.setValueCoded(answer);
-		} else if (datatype.isDate() || datatype.isDateTime() || datatype.isTime()) {
-			String valueString = line.get(HEADER_VALUE);
-			DateTimeFormatter parser = ISODateTimeFormat.dateTimeNoMillis();
-			Date value = parser.parseDateTime(valueString).toDate();
-			obs.setValueDatetime(value);
-		} else if (datatype.isNumeric()) {
-			Double value = line.getDouble(HEADER_VALUE);
-			obs.setValueNumeric(value);
-		} else if (datatype.isText()) {
-			String value = line.get(HEADER_VALUE);
-			obs.setValueText(value);
-		} // do nothing if datatype.isAnswerOnly()
+		if (c.isSet()) {
+			String memberConceptsStr = line.get(HEADER_SET_MEMBERS, true);
+			String[] memberConcepts = memberConceptsStr.split(LIST_SEPARATOR);
+			String valuesStr = line.get(HEADER_SET_MEMBER_VALUES, true);
+			String[] values = valuesStr.split(LIST_SEPARATOR);
+			if (memberConcepts.length != values.length) {
+				throw new IllegalArgumentException(HEADER_SET_MEMBERS + " and " + HEADER_SET_MEMBER_VALUES + " must "
+				        + "have the same number of semicolon-delimited items.");
+			}
+			for (int i = 0; i < memberConcepts.length; i++) {
+				String uuid = computeMemberObsUuid(obs, memberConcepts[i]);
+				Obs memberObs = service.getObsByUuid(uuid);
+				if (memberObs == null) {
+					memberObs = new Obs();
+					memberObs.setUuid(uuid);
+				}
+				memberObs.setEncounter(enc);
+				memberObs.setObsDatetime(date);
+				memberObs.setPerson(person);
+				memberObs.setLocation(loc);
+				Concept mc = lookupConcept(cs, memberConcepts[i]);
+				memberObs.setConcept(mc);
+				setObsValue(memberObs, values[i]);
+				obs.addGroupMember(memberObs);
+			}
+		} else {
+			setObsValue(obs, line.get(HEADER_VALUE));
+		}
 		
 		return obs;
 	}
 	
 	private void throwBadHeader(String headerName) throws IllegalArgumentException {
 		throw new IllegalArgumentException("Either " + headerName + " or " + HEADER_ENCOUNTER_UUID + " are required.");
+	}
+	
+	private Concept lookupConcept(ConceptService cs, String refTermOrName) {
+		if (refTermOrName.contains(":")) {
+			String[] termSourceAndTerm = refTermOrName.split(":");
+			if (termSourceAndTerm.length != 2) {
+				throw new IllegalArgumentException("Concept Reference Terms should be specified like 'Term Source:Code'");
+			} else {
+				return cs.getConceptByMapping(termSourceAndTerm[1], termSourceAndTerm[0]);
+			}
+		} else {
+			return cs.getConceptByName(refTermOrName);
+		}
 	}
 	
 	private Date getAndParseDate(CsvLine line) throws IllegalArgumentException {
@@ -206,6 +214,35 @@ public class ObsLineProcessor extends BaseLineProcessor<Obs, ObsService> {
 			return enc.getLocation();
 		}
 		return null;
+	}
+	
+	private String computeMemberObsUuid(Obs setObs, String memberConceptStr) {
+		String hashString = setObs.getUuid() + memberConceptStr;
+		return UUID.nameUUIDFromBytes(hashString.getBytes()).toString();
+	}
+	
+	private void setObsValue(Obs obs, String valueStr) {
+		Concept c = obs.getConcept();
+		ConceptDatatype datatype = c.getDatatype();
+		if (datatype.isBoolean()) {
+			Boolean value = BooleanUtils.toBoolean(valueStr);
+			obs.setValueBoolean(value);
+		} else if (datatype.isCoded()) {
+			ConceptService cs = Context.getConceptService();
+			Concept answer = lookupConcept(cs, valueStr);
+			obs.setValueCoded(answer);
+		} else if (datatype.isDate() || datatype.isDateTime() || datatype.isTime()) {
+			DateTimeFormatter parser = ISODateTimeFormat.dateTimeNoMillis();
+			Date value = parser.parseDateTime(valueStr).toDate();
+			obs.setValueDatetime(value);
+		} else if (datatype.isNumeric()) {
+			Double value = Double.parseDouble(valueStr);
+			obs.setValueNumeric(value);
+		} else if (datatype.isText()) {
+			obs.setValueText(valueStr);
+		} // do nothing if datatype.isAnswerOnly(), or is NA
+		  // TODO: Handle datatypes Rule, Structured Numeric, and Complex
+		  // (ConceptDatatypes.java: https://git.io/fh7Zt)
 	}
 	
 }

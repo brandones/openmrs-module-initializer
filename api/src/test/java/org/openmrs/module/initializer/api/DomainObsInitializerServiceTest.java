@@ -33,6 +33,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+
+import static org.hamcrest.CoreMatchers.is;
 
 public class DomainObsInitializerServiceTest extends DomainBaseModuleContextSensitiveTest {
 	
@@ -153,6 +156,34 @@ public class DomainObsInitializerServiceTest extends DomainBaseModuleContextSens
 			Assert.assertEquals((Integer) 20, o.getConcept().getId());
 			Date expectedValue = new DateTime(2018, 7, 1, 0, 0, 0, DateTimeZone.UTC).toDate();
 			Assert.assertEquals(expectedValue, o.getValueDatetime());
+		}
+		// Verify creation of an obs set
+		{
+			Obs o = os.getObsByUuid("fd93d046-a558-4112-a2fd-275ee4da4f66");
+			Assert.assertNotNull(o);
+			Assert.assertEquals((Integer) 23, o.getConcept().getId());
+			Assert.assertThat(o.isObsGrouping(), is(true));
+			Set<Obs> members = o.getGroupMembers();
+			Assert.assertEquals(2, members.size());
+			boolean foundFoodAssistance = false;
+			boolean foundFavoriteFood = false;
+			for (Obs mo : members) {
+				if (mo.getConcept().isNamed("FOOD ASSISTANCE")) {
+					foundFoodAssistance = true;
+					Assert.assertEquals(true, mo.getValueBoolean());
+				} else if (mo.getConcept().isNamed("FAVORITE FOOD, NON-CODED")) {
+					foundFavoriteFood = true;
+					Assert.assertEquals("Blood of enemies", mo.getValueText());
+				} else {
+					Assert.fail("Observation has unexpected member " + mo.getConcept().getName());
+				}
+			}
+			if (!foundFoodAssistance) {
+				Assert.fail("Didn't find expected member observation 'FOOD ASSISTANCE'");
+			}
+			if (!foundFavoriteFood) {
+				Assert.fail("Didn't find expected member observation 'FAVORITE FOOD, NON-CODED'");
+			}
 		}
 		// Verify edit
 		{

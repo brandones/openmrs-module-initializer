@@ -45,7 +45,7 @@ public class CsvParserFactory {
 		if (InitializerConstants.DOMAIN_LOC.equals(domain)) {
 			return new LocationsCsvParser(is, Context.getLocationService());
 		}
-
+		
 		if (InitializerConstants.DOMAIN_PAT.equals(domain)) {
 			return new PersonAttributeTypesCsvParser(is, Context.getPersonService());
 		}
@@ -54,7 +54,7 @@ public class CsvParserFactory {
 		if (InitializerConstants.DOMAIN_ENC.equals(domain)) {
 			return new EncountersCsvParser(is, Context.getEncounterService());
 		}
-
+		
 		if (InitializerConstants.DOMAIN_OBS.equals(domain)) {
 			return new ObsCsvParser(is, Context.getObsService());
 		}

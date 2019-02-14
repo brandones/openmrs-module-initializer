@@ -19,10 +19,13 @@ import java.util.Date;
 public class EncounterLineProcessor extends BaseLineProcessor<Encounter, EncounterService> {
 	
 	public static final String HEADER_DATE = "Date";
+	
 	public static final String HEADER_PT_UUID = "Patient UUID";
+	
 	public static final String HEADER_LOCATION = "Location";
+	
 	public static final String HEADER_ENCOUNTER_TYPE = "Encounter Type";
-
+	
 	public EncounterLineProcessor(String[] headerLine, EncounterService es) {
 		super(headerLine, es);
 	}
@@ -53,7 +56,7 @@ public class EncounterLineProcessor extends BaseLineProcessor<Encounter, Encount
 		}
 		Date date = parser.parseDateTime(dateString).toDate();
 		enc.setEncounterDatetime(date);
-
+		
 		PatientService ps = Context.getPatientService();
 		String ptUuid = line.getString(HEADER_PT_UUID);
 		Patient pt = ps.getPatientByUuid(ptUuid);
@@ -61,7 +64,7 @@ public class EncounterLineProcessor extends BaseLineProcessor<Encounter, Encount
 			throw new IllegalArgumentException("No patient exists with UUID " + ptUuid);
 		}
 		enc.setPatient(pt);
-
+		
 		LocationService ls = Context.getLocationService();
 		String locationString = line.getString(HEADER_LOCATION);
 		Location loc = ls.getLocation(locationString);
@@ -69,14 +72,14 @@ public class EncounterLineProcessor extends BaseLineProcessor<Encounter, Encount
 			throw new IllegalArgumentException("No location named " + locationString + " exists");
 		}
 		enc.setLocation(loc);
-
+		
 		String encounterTypeString = line.getString(HEADER_ENCOUNTER_TYPE);
 		EncounterType et = service.getEncounterType(encounterTypeString);
 		if (et == null) {
 			throw new IllegalArgumentException("No Encounter Type named " + encounterTypeString + " exists");
 		}
 		enc.setEncounterType(et);
-
+		
 		return enc;
 	}
 	

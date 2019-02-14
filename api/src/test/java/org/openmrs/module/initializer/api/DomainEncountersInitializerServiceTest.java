@@ -56,32 +56,32 @@ public class DomainEncountersInitializerServiceTest extends DomainBaseModuleCont
 		Location xanadu = ls.getLocation("Xanadu");
 		
 		// a patient for the encounters
-        Patient pt = new Patient();
-        pt.setUuid("a03e395c-b881-49b7-b6fc-983f6bddc7fc");
-        pt.addName(new PersonName("Frodo", null, "Baggins"));
-        PatientIdentifier pid = new PatientIdentifier("0001", pit, xanadu);
-        pid.setPreferred(true);
-        pt.addIdentifier(pid);
-        pt.setGender("M");
-        pt.setDateCreated(new DateTime(2016, 3, 10, 0, 0, 0).toDate());
-        ps.savePatient(pt);
-
+		Patient pt = new Patient();
+		pt.setUuid("a03e395c-b881-49b7-b6fc-983f6bddc7fc");
+		pt.addName(new PersonName("Frodo", null, "Baggins"));
+		PatientIdentifier pid = new PatientIdentifier("0001", pit, xanadu);
+		pid.setPreferred(true);
+		pt.addIdentifier(pid);
+		pt.setGender("M");
+		pt.setDateCreated(new DateTime(2016, 3, 10, 0, 0, 0).toDate());
+		ps.savePatient(pt);
+		
 		// an encounter to edit
 		{
 			Encounter enc = new Encounter();
 			enc.setUuid("c64730db-ab24-4036-a2aa-46177e743db9");
-			enc.setEncounterDatetime(new DateTime(2018, 1, 1, 0, 0,0, DateTimeZone.UTC).toDate());
+			enc.setEncounterDatetime(new DateTime(2018, 1, 1, 0, 0, 0, DateTimeZone.UTC).toDate());
 			enc.setLocation(xanadu);
 			enc.setEncounterType(es.getEncounterType("Scheduled"));
 			enc.setPatient(pt);
 			es.saveEncounter(enc);
 		}
-
+		
 		// an encounter to void
 		{
 			Encounter enc = new Encounter();
 			enc.setUuid("a3f81565-b0d9-44b5-ba5f-665ed8dfd697");
-			enc.setEncounterDatetime(new DateTime(2018, 1, 2, 0, 0,0, DateTimeZone.UTC).toDate());
+			enc.setEncounterDatetime(new DateTime(2018, 1, 2, 0, 0, 0, DateTimeZone.UTC).toDate());
 			enc.setLocation(xanadu);
 			enc.setEncounterType(es.getEncounterType("Scheduled"));
 			enc.setPatient(pt);
@@ -97,17 +97,17 @@ public class DomainEncountersInitializerServiceTest extends DomainBaseModuleCont
 		
 		// Verify creation of an encounter for Frodo
 		{
-		    Encounter enc = es.getEncounterByUuid("b330f4de-ed7d-4e9d-9ff3-81997e729aa8");
-		    Assert.assertNotNull(enc);
-		    Date dt = new DateTime(2018, 2, 1, 10, 0, 0, DateTimeZone.UTC).toDate();
-		    Assert.assertEquals(dt, enc.getEncounterDatetime());
-		    Assert.assertEquals("a03e395c-b881-49b7-b6fc-983f6bddc7fc", enc.getPatient().getUuid());
-		    Assert.assertEquals("Xanadu", enc.getLocation().getName());
-		    Assert.assertEquals("Scheduled", enc.getEncounterType().getName());
+			Encounter enc = es.getEncounterByUuid("b330f4de-ed7d-4e9d-9ff3-81997e729aa8");
+			Assert.assertNotNull(enc);
+			Date dt = new DateTime(2018, 2, 1, 10, 0, 0, DateTimeZone.UTC).toDate();
+			Assert.assertEquals(dt, enc.getEncounterDatetime());
+			Assert.assertEquals("a03e395c-b881-49b7-b6fc-983f6bddc7fc", enc.getPatient().getUuid());
+			Assert.assertEquals("Xanadu", enc.getLocation().getName());
+			Assert.assertEquals("Scheduled", enc.getEncounterType().getName());
 		}
 		// Verify edit
 		{
-		    Encounter enc = es.getEncounterByUuid("c64730db-ab24-4036-a2aa-46177e743db9");
+			Encounter enc = es.getEncounterByUuid("c64730db-ab24-4036-a2aa-46177e743db9");
 			Assert.assertNotNull(enc);
 			Date dt = new DateTime(2018, 1, 1, 13, 0, 0, DateTimeZone.UTC).toDate();
 			Assert.assertEquals(dt, enc.getEncounterDatetime());

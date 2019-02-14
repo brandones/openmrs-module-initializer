@@ -104,7 +104,7 @@ public interface InitializerService extends OpenmrsService {
 	 * Loads the encounters from their domain import data dir, and saves them.
 	 */
 	void loadEncounters();
-
+	
 	/**
 	 * Fetches a value from the JSON key-value configuration.
 	 */

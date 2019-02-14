@@ -47,7 +47,10 @@ public class EncounterLineProcessor extends BaseLineProcessor<Encounter, Encount
 	@Override
 	protected Encounter fill(Encounter enc, CsvLine line) throws IllegalArgumentException {
 		DateTimeFormatter parser = ISODateTimeFormat.dateTimeNoMillis();
-		String dateString = line.getString(HEADER_DATE);
+		String dateString = line.get(HEADER_DATE);
+		if (dateString == null) {
+			throw new IllegalArgumentException("Column '" + HEADER_DATE + "' is required");
+		}
 		Date date = parser.parseDateTime(dateString).toDate();
 		enc.setEncounterDatetime(date);
 

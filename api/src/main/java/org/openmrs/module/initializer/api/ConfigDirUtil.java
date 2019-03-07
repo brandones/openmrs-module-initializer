@@ -18,6 +18,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 /**
  * Helps read and write to and from the configuration and checksum directories.
@@ -53,6 +56,8 @@ public class ConfigDirUtil {
 	public ConfigDirUtil(String configDirPath, String checksumDirPath, String domain) {
 		this.domainDirPath = new StringBuilder(configDirPath).append(File.separator).append(domain).toString();
 		this.checksumDirPath = new StringBuilder(checksumDirPath).append(File.separator).append(domain).toString();
+		Logger logger = LogManager.getLogger(CsvParser.class); // TODO: **DEBUG** (remove me)
+		logger.setLevel(Level.DEBUG); // TODO: **DEBUG** (remove me)
 	}
 	
 	public String getDomainDirPath() {
@@ -414,6 +419,7 @@ public class ConfigDirUtil {
 		
 		// parsing the CSV files
 		for (OrderableCsvFile file : files) {
+			log.info("Processing '" + domain + "' file " + file.getFile().getPath());
 			InputStream is = null;
 			try {
 				is = new FileInputStream(file.getFile());
@@ -421,8 +427,7 @@ public class ConfigDirUtil {
 				CsvParserFactory.create(is, domain).saveAll();
 				
 				util.writeChecksum(file.getFile().getName(), file.getChecksum());
-				log.info(
-				    "The following '" + domain + "' config file was succesfully processed: " + file.getFile().getName());
+				log.info("The following '" + domain + "' file was succesfully processed: " + file.getFile().getName());
 			}
 			catch (IOException e) {
 				log.error("Could not parse the '" + domain + "' config file: " + file.getFile().getPath(), e);

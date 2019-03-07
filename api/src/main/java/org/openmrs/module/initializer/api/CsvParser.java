@@ -11,16 +11,22 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.BaseOpenmrsMetadata;
 import org.openmrs.BaseOpenmrsObject;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.initializer.InitializerConstants;
 
 import com.opencsv.CSVReader;
 
 public abstract class CsvParser<T extends BaseOpenmrsObject, S extends OpenmrsService, P extends BaseLineProcessor<T, S>> {
+	
+	protected static final int NUM_ITEMS_TO_SAVE_PER_FLUSH_CLEAR = 25; // agrees with openmrs-core: https://git.io/fhF28
 	
 	protected static final String DEFAULT_RETIRE_REASON = "Retired by module " + InitializerConstants.MODULE_NAME;
 	
@@ -47,6 +53,8 @@ public abstract class CsvParser<T extends BaseOpenmrsObject, S extends OpenmrsSe
 		headerLine = reader.readNext();
 		String version = P.getVersion(headerLine);
 		setLineProcessors(version, headerLine);
+		Logger logger = LogManager.getLogger(CsvParser.class); // TODO: **DEBUG** (remove me)
+		logger.setLevel(Level.DEBUG); // TODO: **DEBUG** (remove me)
 	}
 	
 	/**
@@ -98,7 +106,7 @@ public abstract class CsvParser<T extends BaseOpenmrsObject, S extends OpenmrsSe
 		// Applying the lines processors in order
 		for (P processor : getLineProcessors()) {
 			CsvLine csvLine = new CsvLine(processor, line);
-			log.debug("Running CsvLineProcessor.fill for line " + csvLine);
+			log.trace("Running CsvLineProcessor.fill for line " + csvLine);
 			instance = processor.fill(instance, csvLine);
 		}
 		return instance;
@@ -164,13 +172,13 @@ public abstract class CsvParser<T extends BaseOpenmrsObject, S extends OpenmrsSe
 	
 	/**
 	 * Main method to proceed to save all instances fetched through parsing the CSV data.
-	 * 
-	 * @return The list of saved OpenMRS objects instances.
 	 */
-	public List<T> saveAll() {
+	public void saveAll() {
 		
-		List<T> instances = new ArrayList<T>();
-		
+		int instancesSaved = 0;
+		int numInstancesPerInterval = 1000;
+		double startTimeS = System.nanoTime() / 10E8;
+		double intervalStartTimeS = startTimeS;
 		String[] line = null;
 		do {
 			try {
@@ -179,7 +187,17 @@ public abstract class CsvParser<T extends BaseOpenmrsObject, S extends OpenmrsSe
 				if (instance != null) {
 					instance = save(instance);
 					if (instance.getId() != null) {
-						instances.add(instance);
+						instancesSaved += 1;
+						if (instancesSaved % NUM_ITEMS_TO_SAVE_PER_FLUSH_CLEAR == 0) {
+							Context.flushSession();
+							Context.clearSession();
+						}
+						if (instancesSaved % numInstancesPerInterval == 0) {
+							double now = System.nanoTime() / 10E8;
+							double runTimeS = now - intervalStartTimeS;
+							log.debug(String.format("Seconds to save %s instances: %s", numInstancesPerInterval, runTimeS));
+							intervalStartTimeS = now;
+						}
 					}
 				}
 			}
@@ -189,7 +207,8 @@ public abstract class CsvParser<T extends BaseOpenmrsObject, S extends OpenmrsSe
 				    e);
 			}
 		} while (line != null);
-		
-		return instances;
+		double endTimeS = System.nanoTime() / 10E8;
+		double totalTimeS = endTimeS - startTimeS;
+		log.debug(String.format("Seconds to parse file: %s", totalTimeS));
 	}
 }

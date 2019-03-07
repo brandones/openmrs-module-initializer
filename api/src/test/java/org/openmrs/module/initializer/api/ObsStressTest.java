@@ -9,8 +9,14 @@
  */
 package org.openmrs.module.initializer.api;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.hibernate.stat.ConcurrentStatisticsImpl;
+import org.hibernate.stat.Statistics;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.aop.LoggingAdvice;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.initializer.DomainBaseModuleContextSensitiveTest;

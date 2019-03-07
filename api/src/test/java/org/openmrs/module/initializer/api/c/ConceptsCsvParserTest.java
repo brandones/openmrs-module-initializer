@@ -22,6 +22,7 @@ import org.openmrs.Concept;
 import org.openmrs.ConceptClass;
 import org.openmrs.ConceptDatatype;
 import org.openmrs.api.ConceptService;
+import org.openmrs.api.context.Context;
 
 /*
  * This kind of test case can be used to quickly trial the parsing routines on test CSVs
@@ -81,7 +82,9 @@ public class ConceptsCsvParserTest {
 		        .getResourceAsStream("testAppDataDir/configuration/concepts/concepts_base.csv");
 		
 		// replay
-		List<Concept> concepts = new ConceptsCsvParser(is, cs).saveAll();
+		ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
+		parser.saveAll();
+		List<Concept> concepts = Context.getConceptService().getAllConcepts();
 		
 		// verif
 		Assert.assertEquals(14, concepts.size());
@@ -111,16 +114,31 @@ public class ConceptsCsvParserTest {
 	public void saveAll_shouldFailOnMisformattedCsv() throws IOException {
 		InputStream is = null;
 		
-		is = getClass().getClassLoader()
-		        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_uuid.csv");
-		Assert.assertTrue(new ConceptsCsvParser(is, cs).saveAll().isEmpty());
+		{
+			is = getClass().getClassLoader()
+			        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_uuid.csv");
+			ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
+			parser.saveAll();
+			List<Concept> concepts = Context.getConceptService().getAllConcepts();
+			Assert.assertTrue(concepts.isEmpty());
+		}
 		
-		is = getClass().getClassLoader()
-		        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_fsn.csv");
-		Assert.assertTrue(new ConceptsCsvParser(is, cs).saveAll().isEmpty());
+		{
+			is = getClass().getClassLoader()
+			        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_fsn.csv");
+			ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
+			parser.saveAll();
+			List<Concept> concepts = Context.getConceptService().getAllConcepts();
+			Assert.assertTrue(concepts.isEmpty());
+		}
 		
-		is = getClass().getClassLoader()
-		        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_shortname.csv");
-		Assert.assertTrue(new ConceptsCsvParser(is, cs).saveAll().isEmpty());
+		{
+			is = getClass().getClassLoader()
+			        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_shortname.csv");
+			ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
+			parser.saveAll();
+			List<Concept> concepts = Context.getConceptService().getAllConcepts();
+			Assert.assertTrue(concepts.isEmpty());
+		}
 	}
 }

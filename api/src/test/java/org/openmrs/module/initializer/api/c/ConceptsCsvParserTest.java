@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -30,10 +31,12 @@ import org.openmrs.api.context.Context;
 public class ConceptsCsvParserTest {
 	
 	private ConceptService cs = mock(ConceptService.class);
-	
+
 	final private Locale localeEn = Locale.ENGLISH;
 	
 	final private Locale localeKm = new Locale("km", "KH");
+
+	private List<Concept> allConcepts = new ArrayList<Concept>();
 	
 	@Before
 	public void setup() {
@@ -59,6 +62,7 @@ public class ConceptsCsvParserTest {
 				Object[] args = invocation.getArguments();
 				Concept c = (Concept) args[0];
 				c.setId(new Random().nextInt()); // ensuring that all concepts have IDs
+				allConcepts.add(c);
 				return c;
 			}
 		});
@@ -73,6 +77,14 @@ public class ConceptsCsvParserTest {
 				return c;
 			}
 		});
+
+		when(cs.getAllConcepts()).thenAnswer(new Answer<List<Concept>>()  {
+
+			@Override
+			public List<Concept> answer(InvocationOnMock invocation) throws Throwable {
+				return allConcepts;
+			}
+		});
 	}
 	
 	@Test
@@ -84,7 +96,7 @@ public class ConceptsCsvParserTest {
 		// replay
 		ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
 		parser.saveAll();
-		List<Concept> concepts = Context.getConceptService().getAllConcepts();
+		List<Concept> concepts = cs.getAllConcepts();
 		
 		// verif
 		Assert.assertEquals(14, concepts.size());
@@ -119,7 +131,7 @@ public class ConceptsCsvParserTest {
 			        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_uuid.csv");
 			ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
 			parser.saveAll();
-			List<Concept> concepts = Context.getConceptService().getAllConcepts();
+			List<Concept> concepts = cs.getAllConcepts();
 			Assert.assertTrue(concepts.isEmpty());
 		}
 		
@@ -128,7 +140,7 @@ public class ConceptsCsvParserTest {
 			        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_fsn.csv");
 			ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
 			parser.saveAll();
-			List<Concept> concepts = Context.getConceptService().getAllConcepts();
+			List<Concept> concepts = cs.getAllConcepts();
 			Assert.assertTrue(concepts.isEmpty());
 		}
 		
@@ -137,7 +149,7 @@ public class ConceptsCsvParserTest {
 			        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_shortname.csv");
 			ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
 			parser.saveAll();
-			List<Concept> concepts = Context.getConceptService().getAllConcepts();
+			List<Concept> concepts = cs.getAllConcepts();
 			Assert.assertTrue(concepts.isEmpty());
 		}
 	}

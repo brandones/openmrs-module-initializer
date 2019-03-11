@@ -31,11 +31,11 @@ import org.openmrs.api.context.Context;
 public class ConceptsCsvParserTest {
 	
 	private ConceptService cs = mock(ConceptService.class);
-
+	
 	final private Locale localeEn = Locale.ENGLISH;
 	
 	final private Locale localeKm = new Locale("km", "KH");
-
+	
 	private List<Concept> allConcepts = new ArrayList<Concept>();
 	
 	@Before
@@ -77,9 +77,9 @@ public class ConceptsCsvParserTest {
 				return c;
 			}
 		});
-
-		when(cs.getAllConcepts()).thenAnswer(new Answer<List<Concept>>()  {
-
+		
+		when(cs.getAllConcepts()).thenAnswer(new Answer<List<Concept>>() {
+			
 			@Override
 			public List<Concept> answer(InvocationOnMock invocation) throws Throwable {
 				return allConcepts;

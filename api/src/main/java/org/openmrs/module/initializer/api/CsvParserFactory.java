@@ -67,7 +67,7 @@ public class CsvParserFactory {
 			return new PersonCsvParser(is, Context.getPersonService());
 		}
 		
-		throw new IllegalArgumentException(
-		        "'" + domain + "' did not point to any identified CSV parser to process the input stream.");
+		throw new IllegalArgumentException("'" + domain
+		        + "' did not point to any identified CSV parser to process the input stream.");
 	}
 }

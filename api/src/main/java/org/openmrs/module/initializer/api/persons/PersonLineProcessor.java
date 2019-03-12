@@ -138,16 +138,16 @@ public class PersonLineProcessor extends BaseLineProcessor<Person, PersonService
 				method.invoke(target, value);
 			}
 			catch (IllegalArgumentException e) {
-				throw new IllegalArgumentException(
-				        String.format("Bad value %s for address field %s for line %s\n%s", value, addressField, line, e));
+				throw new IllegalArgumentException(String.format("Bad value %s for address field %s for line %s\n%s", value,
+				    addressField, line, e));
 			}
 			catch (IllegalAccessException e) {
-				throw new RuntimeException(
-				        String.format("Unable to set address field %s for line %s\n%s", addressField, line, e));
+				throw new RuntimeException(String.format("Unable to set address field %s for line %s\n%s", addressField,
+				    line, e));
 			}
 			catch (InvocationTargetException e) {
-				throw new RuntimeException(
-				        String.format("Unable to set address field %s for line %s\n%s", addressField, line, e));
+				throw new RuntimeException(String.format("Unable to set address field %s for line %s\n%s", addressField,
+				    line, e));
 			}
 		}
 		catch (SecurityException e) {
@@ -155,8 +155,8 @@ public class PersonLineProcessor extends BaseLineProcessor<Person, PersonService
 			        String.format("Unable to set address field %s for line %s\n%s", addressField, line, e));
 		}
 		catch (NoSuchMethodException e) {
-			throw new IllegalArgumentException(
-			        String.format("Invalid address field %s in line %s\n%s", addressField, line, e));
+			throw new IllegalArgumentException(String.format("Invalid address field %s in line %s\n%s", addressField, line,
+			    e));
 		}
 		
 	}

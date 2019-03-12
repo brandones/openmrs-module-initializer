@@ -30,8 +30,11 @@ public class EncounterLineProcessor extends BaseLineProcessor<Encounter, Encount
 	
 	public static final String HEADER_FORM_UUID = "Form UUID"; // optional
 	
+	private FormService formService;
+	
 	public EncounterLineProcessor(String[] headerLine, EncounterService es) {
 		super(headerLine, es);
+		formService = Context.getFormService();
 	}
 	
 	@Override
@@ -83,7 +86,6 @@ public class EncounterLineProcessor extends BaseLineProcessor<Encounter, Encount
 		
 		String formUuidString = line.getString(HEADER_FORM_UUID);
 		if (formUuidString != null && !formUuidString.isEmpty()) {
-			FormService formService = Context.getFormService();
 			Form form = formService.getFormByUuid(formUuidString);
 			if (form == null) {
 				throw new IllegalArgumentException("No Form exists with UUID " + formUuidString);

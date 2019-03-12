@@ -104,6 +104,7 @@ public class DomainEncountersInitializerServiceTest extends DomainBaseModuleCont
 			Assert.assertEquals("a03e395c-b881-49b7-b6fc-983f6bddc7fc", enc.getPatient().getUuid());
 			Assert.assertEquals("Xanadu", enc.getLocation().getName());
 			Assert.assertEquals("Scheduled", enc.getEncounterType().getName());
+			Assert.assertEquals("Basic Form", enc.getForm().getName());
 		}
 		// Verify edit
 		{

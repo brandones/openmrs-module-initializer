@@ -37,8 +37,8 @@ public class DomainMDSInitializerServiceTest extends DomainBaseModuleContextSens
 		getService().importMetadataSharingPackages();
 		
 		// Verif
-		PatientIdentifierType patientIdType = Context.getPatientService().getPatientIdentifierTypeByUuid(
-		    "0d2ac572-8de3-46c8-9976-1f78899c599f");
+		PatientIdentifierType patientIdType = Context.getPatientService()
+		        .getPatientIdentifierTypeByUuid("0d2ac572-8de3-46c8-9976-1f78899c599f");
 		Assert.assertEquals("National ID card number", patientIdType.getName());
 		
 		personAttType = Context.getPersonService().getPersonAttributeTypeByUuid("b3b6d540-a32e-44c7-91b3-292d97667518");

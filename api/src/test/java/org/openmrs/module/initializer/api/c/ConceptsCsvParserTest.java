@@ -90,8 +90,8 @@ public class ConceptsCsvParserTest {
 	@Test
 	public void saveAll_shouldParseBaseCsv() throws IOException {
 		// setup
-		InputStream is = getClass().getClassLoader().getResourceAsStream(
-		    "testAppDataDir/configuration/concepts/concepts_base.csv");
+		InputStream is = getClass().getClassLoader()
+		        .getResourceAsStream("testAppDataDir/configuration/concepts/concepts_base.csv");
 		
 		// replay
 		ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
@@ -127,8 +127,8 @@ public class ConceptsCsvParserTest {
 		InputStream is = null;
 		
 		{
-			is = getClass().getClassLoader().getResourceAsStream(
-			    "org/openmrs/module/initializer/include/csv/concepts_no_uuid.csv");
+			is = getClass().getClassLoader()
+			        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_uuid.csv");
 			ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
 			parser.saveAll();
 			List<Concept> concepts = cs.getAllConcepts();
@@ -136,8 +136,8 @@ public class ConceptsCsvParserTest {
 		}
 		
 		{
-			is = getClass().getClassLoader().getResourceAsStream(
-			    "org/openmrs/module/initializer/include/csv/concepts_no_fsn.csv");
+			is = getClass().getClassLoader()
+			        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_fsn.csv");
 			ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
 			parser.saveAll();
 			List<Concept> concepts = cs.getAllConcepts();
@@ -145,8 +145,8 @@ public class ConceptsCsvParserTest {
 		}
 		
 		{
-			is = getClass().getClassLoader().getResourceAsStream(
-			    "org/openmrs/module/initializer/include/csv/concepts_no_shortname.csv");
+			is = getClass().getClassLoader()
+			        .getResourceAsStream("org/openmrs/module/initializer/include/csv/concepts_no_shortname.csv");
 			ConceptsCsvParser parser = new ConceptsCsvParser(is, cs);
 			parser.saveAll();
 			List<Concept> concepts = cs.getAllConcepts();

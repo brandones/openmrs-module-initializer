@@ -63,7 +63,8 @@ public class PatientLineProcessor extends BaseLineProcessor<Patient, PatientServ
 			String[] piParts = piString.split(":");
 			if (piParts.length < 3) {
 				throw new IllegalArgumentException(String.format("Ignoring invalid patient identifier entry '%s'."
-				        + "Patient identifiers should be formatted like 'id_name:id:id_location;...'.", piString));
+				        + "Patient identifiers should be formatted like 'id_name:id:id_location;...'.",
+				    piString));
 			}
 			PatientIdentifierType pit = service.getPatientIdentifierTypeByName(piParts[0]);
 			Location piLocation = locationService.getLocation(piParts[2]);

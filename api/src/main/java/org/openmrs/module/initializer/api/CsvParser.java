@@ -87,9 +87,9 @@ public abstract class CsvParser<T extends BaseOpenmrsObject, S extends OpenmrsSe
 		// Boostrapping
 		P bootstrapper = getAnyLineProcessor();
 		if (bootstrapper == null) { // no processors available
-			log.warn("No line processors have been set, you should either overload '"
-			        + getClass().getEnclosingMethod().getName() + "' directly or provide lines processors to this class: "
-			        + getClass().getCanonicalName());
+			log.warn(
+			    "No line processors have been set, you should either overload '" + getClass().getEnclosingMethod().getName()
+			            + "' directly or provide lines processors to this class: " + getClass().getCanonicalName());
 			return null;
 		}
 		
@@ -208,9 +208,9 @@ public abstract class CsvParser<T extends BaseOpenmrsObject, S extends OpenmrsSe
 				}
 			}
 			catch (Exception e) {
-				log.error(
-				    "An OpenMRS object could not be constructed or saved from the following CSV line: "
-				            + Arrays.toString(line), e);
+				log.error("An OpenMRS object could not be constructed or saved from the following CSV line: "
+				        + Arrays.toString(line),
+				    e);
 			}
 		} while (line != null);
 		double endTimeS = System.nanoTime() / 10E8;

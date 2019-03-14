@@ -246,8 +246,8 @@ public class DomainCInitializerServiceTest extends DomainBaseModuleContextSensit
 		
 		// Verif 'nested' CSV loading
 		{
-			Set<String> nestedUuids = new HashSet<String>(Arrays.asList(new String[] {
-			        "8bc5043c-3221-11e7-93ae-92361f002671", "8bc506bc-3221-11e7-93ae-92361f002671" }));
+			Set<String> nestedUuids = new HashSet<String>(Arrays.asList(
+			    new String[] { "8bc5043c-3221-11e7-93ae-92361f002671", "8bc506bc-3221-11e7-93ae-92361f002671" }));
 			
 			// Verif question
 			c = cs.getConceptByUuid("8bc50946-3221-11e7-93ae-92361f002671");

@@ -135,8 +135,8 @@ public class ConfigDirUtil {
 	}
 	
 	/**
-	 * Returns the checksum of a config file if the file has been updated since the last checksum
-	 * was saved.
+	 * Returns the checksum of a config file if the file has been updated since the last checksum was
+	 * saved.
 	 * 
 	 * @param domainDirPath The absolute path to the domain directory, eg.
 	 *            "../configuration/addresshierarchy"
@@ -189,8 +189,7 @@ public class ConfigDirUtil {
 	 * Fetches the config. file from its relative path inside the configuration folder.
 	 * 
 	 * @param dirPath The absolute path to the containing directory, eg.
-	 *            "../configuration/addresshierarchy" or
-	 *            "../configuration_checksums/addresshierarchy"
+	 *            "../configuration/addresshierarchy" or "../configuration_checksums/addresshierarchy"
 	 * @param fileName The file name, eg. "config.xml" or "config.checksum"
 	 * @return The {@link File} instance.
 	 */

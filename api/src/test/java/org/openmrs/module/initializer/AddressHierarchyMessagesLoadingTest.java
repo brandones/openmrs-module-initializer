@@ -58,16 +58,14 @@ public class AddressHierarchyMessagesLoadingTest extends DomainBaseModuleContext
 	@Before
 	public void setup() {
 		// Disabling AH full caching otherwise loading takes too long
+		Context.getAdministrationService().saveGlobalProperty(new GlobalProperty(
+		        AddressHierarchyConstants.GLOBAL_PROP_INITIALIZE_ADDRESS_HIERARCHY_CACHE_ON_STARTUP, "false"));
+		
 		Context.getAdministrationService()
-		        .saveGlobalProperty(
-		            new GlobalProperty(AddressHierarchyConstants.GLOBAL_PROP_INITIALIZE_ADDRESS_HIERARCHY_CACHE_ON_STARTUP,
-		                    "false"));
+		        .saveGlobalProperty(new GlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST, "en, km_KH"));
 		
-		Context.getAdministrationService().saveGlobalProperty(
-		    new GlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_LOCALE_ALLOWED_LIST, "en, km_KH"));
-		
-		Context.getAdministrationService().saveGlobalProperty(
-		    new GlobalProperty(ExtI18nConstants.GLOBAL_PROP_REV_I18N_SUPPORT, "true"));
+		Context.getAdministrationService()
+		        .saveGlobalProperty(new GlobalProperty(ExtI18nConstants.GLOBAL_PROP_REV_I18N_SUPPORT, "true"));
 		runtimeProperties.setProperty(ModuleConstants.RUNTIMEPROPERTY_MODULE_LIST_TO_LOAD, MODULES_TO_LOAD);
 		ModuleUtil.startup(runtimeProperties);
 		Assert.assertTrue(ModuleFactory.isModuleStarted(ExtI18nConstants.MODULE_ARTIFACT_ID));
@@ -77,8 +75,8 @@ public class AddressHierarchyMessagesLoadingTest extends DomainBaseModuleContext
 	
 	@After
 	public void tearDown() {
-		Context.getAdministrationService().saveGlobalProperty(
-		    new GlobalProperty(ExtI18nConstants.GLOBAL_PROP_REV_I18N_SUPPORT, "false"));
+		Context.getAdministrationService()
+		        .saveGlobalProperty(new GlobalProperty(ExtI18nConstants.GLOBAL_PROP_REV_I18N_SUPPORT, "false"));
 		ModuleFactory.stopModule(ModuleFactory.getModuleById(ExtI18nConstants.MODULE_ARTIFACT_ID));
 	}
 	

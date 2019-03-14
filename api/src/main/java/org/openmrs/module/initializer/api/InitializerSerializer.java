@@ -30,8 +30,7 @@ public class InitializerSerializer extends XStream {
 	
 	@Override
 	protected MapperWrapper wrapMapper(MapperWrapper next) {
-		return new MapperWrapper(
-		                         next) {
+		return new MapperWrapper(next) {
 			
 			@Override
 			public boolean shouldSerializeMember(Class definedIn, String fieldName) {

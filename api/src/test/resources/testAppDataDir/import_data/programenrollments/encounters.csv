@@ -1,4 +1,0 @@
-uuid,Date,Patient UUID,Location,Encounter Type,Form UUID,Void/Retire
-b330f4de-ed7d-4e9d-9ff3-81997e729aa8,2018-02-01T10:00:00Z,a03e395c-b881-49b7-b6fc-983f6bddc7fc,Xanadu,Scheduled,d9218f76-6c39-45f4-8efa-4c5c6c199f50,
-c64730db-ab24-4036-a2aa-46177e743db9,2018-01-01T13:00:00Z,a03e395c-b881-49b7-b6fc-983f6bddc7fc,Xanadu,Scheduled,,
-a3f81565-b0d9-44b5-ba5f-665ed8dfd697,2018-01-01T14:00:00Z,a03e395c-b881-49b7-b6fc-983f6bddc7fc,Xanadu,Scheduled,,TRUE

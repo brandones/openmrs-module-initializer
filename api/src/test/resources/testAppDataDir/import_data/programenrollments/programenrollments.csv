@@ -1,0 +1,4 @@
+uuid,Void/Retire,Date Enrolled,Date Completed,Person UUID,Program Name,Location,Outcome Concept
+f2a345cc-ffbc-4350-aeef-10ba109cf924,,2018-02-01T10:00:00Z,2018-10-01T10:00:00Z,a03e395c-b881-49b7-b6fc-983f6bddc7fc,HIV PROGRAM,Xanadu,DIED
+ac5b0ad6-f7e0-4fcc-8c87-98b7dab6a6fe,,2018-01-01T13:00:00Z,,a03e395c-b881-49b7-b6fc-983f6bddc7fc,HIV PROGRAM,Xanadu,
+9b73d578-3f15-4cea-9415-4d07b8c337ee,TRUE,2018-01-01T14:00:00Z,,a03e395c-b881-49b7-b6fc-983f6bddc7fc,HIV PROGRAM,Xanadu,

@@ -1,25 +1,26 @@
-package org.openmrs.module.initializer.api.encounters;
+package org.openmrs.module.initializer.api.programenrollments;
 
-import org.openmrs.Encounter;
-import org.openmrs.api.EncounterService;
+import org.openmrs.PatientProgram;
+import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.module.initializer.api.CsvParser;
+import org.openmrs.module.initializer.api.programenrollments.ProgramEnrollmentLineProcessor;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ProgramEnrollmentsCsvParser extends CsvParser<Encounter, EncounterService, ProgramEnrollmentLineProcessor> {
+public class ProgramEnrollmentsCsvParser extends CsvParser<PatientProgram, ProgramWorkflowService, ProgramEnrollmentLineProcessor> {
 	
-	public ProgramEnrollmentsCsvParser(InputStream is, EncounterService es) throws IOException {
-		super(is, es);
+	public ProgramEnrollmentsCsvParser(InputStream is, ProgramWorkflowService pws) throws IOException {
+		super(is, pws);
 	}
 	
 	@Override
-	protected Encounter save(Encounter instance) {
-		return service.saveEncounter(instance);
+	protected PatientProgram save(PatientProgram instance) {
+		return service.savePatientProgram(instance);
 	}
 	
 	@Override
-	protected boolean isVoidedOrRetired(Encounter instance) {
+	protected boolean isVoidedOrRetired(PatientProgram instance) {
 		return instance.getVoided();
 	}
 	

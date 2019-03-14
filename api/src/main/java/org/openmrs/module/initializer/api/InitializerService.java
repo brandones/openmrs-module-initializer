@@ -111,6 +111,11 @@ public interface InitializerService extends OpenmrsService {
 	void loadObservations();
 	
 	/**
+	 * Loads the program enrollments from their domain import data dir, and saves them.
+	 */
+	void loadProgramEnrollments();
+	
+	/**
 	 * Fetches a value from the JSON key-value configuration.
 	 */
 	String getValueFromKey(String key);

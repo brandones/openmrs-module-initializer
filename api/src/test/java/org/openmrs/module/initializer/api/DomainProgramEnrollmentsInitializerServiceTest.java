@@ -19,33 +19,30 @@ import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.PatientProgram;
 import org.openmrs.PersonName;
+import org.openmrs.Program;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
+import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.initializer.DomainBaseModuleContextSensitiveTest;
 import org.openmrs.module.initializer.InitializerConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Set;
-import java.util.TimeZone;
 
-import static org.hamcrest.CoreMatchers.is;
-
-public class DomainEncountersInitializerServiceTest extends DomainBaseModuleContextSensitiveTest {
+public class DomainProgramEnrollmentsInitializerServiceTest extends DomainBaseModuleContextSensitiveTest {
 	
 	@Autowired
-	@Qualifier("encounterService")
-	private EncounterService es;
+	@Qualifier("programWorkflowService")
+	private ProgramWorkflowService pws;
 	
 	@Override
 	protected String getDomain() {
-		return InitializerConstants.DOMAIN_ENC;
+		return InitializerConstants.DOMAIN_PROGRAM_ENROLLMENTS;
 	}
 	
 	@Before
@@ -55,7 +52,7 @@ public class DomainEncountersInitializerServiceTest extends DomainBaseModuleCont
 		PatientIdentifierType pit = ps.getPatientIdentifierTypeByName("Old Identification Number");
 		Location xanadu = ls.getLocation("Xanadu");
 		
-		// a patient for the encounters
+		// a patient for the enrollments
 		Patient pt = new Patient();
 		pt.setUuid("a03e395c-b881-49b7-b6fc-983f6bddc7fc");
 		pt.addName(new PersonName("Frodo", null, "Baggins"));
@@ -66,58 +63,63 @@ public class DomainEncountersInitializerServiceTest extends DomainBaseModuleCont
 		pt.setDateCreated(new DateTime(2016, 3, 10, 0, 0, 0).toDate());
 		ps.savePatient(pt);
 		
-		// an encounter to edit
+		// an enrollment to edit
 		{
-			Encounter enc = new Encounter();
-			enc.setUuid("c64730db-ab24-4036-a2aa-46177e743db9");
-			enc.setEncounterDatetime(new DateTime(2018, 1, 1, 0, 0, 0, DateTimeZone.UTC).toDate());
-			enc.setLocation(xanadu);
-			enc.setEncounterType(es.getEncounterType("Scheduled"));
-			enc.setPatient(pt);
-			es.saveEncounter(enc);
+			PatientProgram pp = new PatientProgram();
+			pp.setUuid("f2a345cc-ffbc-4350-aeef-10ba109cf924");
+			Program program = pws.getProgramByName("MDR-TB PROGRAM");
+			pp.setProgram(program);
+			pp.setPatient(pt);
+			pp.setDateEnrolled(new Date());
+			pws.savePatientProgram(pp);
 		}
 		
-		// an encounter to void
+		// an enrollment to void
 		{
-			Encounter enc = new Encounter();
-			enc.setUuid("a3f81565-b0d9-44b5-ba5f-665ed8dfd697");
-			enc.setEncounterDatetime(new DateTime(2018, 1, 2, 0, 0, 0, DateTimeZone.UTC).toDate());
-			enc.setLocation(xanadu);
-			enc.setEncounterType(es.getEncounterType("Scheduled"));
-			enc.setPatient(pt);
-			es.saveEncounter(enc);
+			PatientProgram pp = new PatientProgram();
+			pp.setUuid("9b73d578-3f15-4cea-9415-4d07b8c337ee");
+			Program program = pws.getProgramByName("HIV PROGRAM");
+			pp.setProgram(program);
+			pp.setPatient(pt);
+			pp.setDateEnrolled(new Date());
+			pws.savePatientProgram(pp);
 		}
 	}
 	
 	@Test
-	public void loadEncounters_shouldLoadAccordingToCsvFiles() {
+	public void loadProgramEnrollments_shouldLoadAccordingToCsvFiles() {
 		
 		// Replay
-		getService().loadEncounters();
+		getService().loadProgramEnrollments();
 		
-		// Verify creation of an encounter for Frodo
+		// Verify creation of a program enrollment
 		{
-			Encounter enc = es.getEncounterByUuid("b330f4de-ed7d-4e9d-9ff3-81997e729aa8");
-			Assert.assertNotNull(enc);
-			Date dt = new DateTime(2018, 2, 1, 10, 0, 0, DateTimeZone.UTC).toDate();
-			Assert.assertEquals(dt, enc.getEncounterDatetime());
-			Assert.assertEquals("a03e395c-b881-49b7-b6fc-983f6bddc7fc", enc.getPatient().getUuid());
-			Assert.assertEquals("Xanadu", enc.getLocation().getName());
-			Assert.assertEquals("Scheduled", enc.getEncounterType().getName());
-			Assert.assertEquals("Basic Form", enc.getForm().getName());
+			PatientProgram pp = pws.getPatientProgramByUuid("ac5b0ad6-f7e0-4fcc-8c87-98b7dab6a6fe");
+			Assert.assertNotNull(pp);
+			Date enrollDate = new DateTime(2018, 1, 1, 13, 0, 0, DateTimeZone.UTC).toDate();
+			Assert.assertEquals(enrollDate, pp.getDateEnrolled());
+			Assert.assertEquals("a03e395c-b881-49b7-b6fc-983f6bddc7fc", pp.getPatient().getUuid());
+			Assert.assertEquals("Xanadu", pp.getLocation().getName());
+			Assert.assertEquals("HIV PROGRAM", pp.getProgram().getName());
 		}
 		// Verify edit
 		{
-			Encounter enc = es.getEncounterByUuid("c64730db-ab24-4036-a2aa-46177e743db9");
-			Assert.assertNotNull(enc);
-			Date dt = new DateTime(2018, 1, 1, 13, 0, 0, DateTimeZone.UTC).toDate();
-			Assert.assertEquals(dt, enc.getEncounterDatetime());
+			PatientProgram pp = pws.getPatientProgramByUuid("f2a345cc-ffbc-4350-aeef-10ba109cf924");
+			Assert.assertNotNull(pp);
+			Date enrollDate = new DateTime(2018, 2, 1, 10, 0, 0, DateTimeZone.UTC).toDate();
+			Assert.assertEquals(enrollDate, pp.getDateEnrolled());
+			Date completeDate = new DateTime(2018, 10, 1, 10, 0, 0, DateTimeZone.UTC).toDate();
+			Assert.assertEquals(completeDate, pp.getDateCompleted());
+			Assert.assertEquals("a03e395c-b881-49b7-b6fc-983f6bddc7fc", pp.getPatient().getUuid());
+			Assert.assertEquals("Xanadu", pp.getLocation().getName());
+			Assert.assertEquals("HIV PROGRAM", pp.getProgram().getName());
+			Assert.assertEquals("DIED", pp.getOutcome().getName().toString());
 		}
 		// Verif retire
 		{
-			Encounter enc = es.getEncounterByUuid("a3f81565-b0d9-44b5-ba5f-665ed8dfd697");
-			Assert.assertNotNull(enc);
-			Assert.assertTrue(enc.isVoided());
+			PatientProgram pp = pws.getPatientProgramByUuid("9b73d578-3f15-4cea-9415-4d07b8c337ee");
+			Assert.assertNotNull(pp);
+			Assert.assertTrue(pp.isVoided());
 		}
 	}
 	

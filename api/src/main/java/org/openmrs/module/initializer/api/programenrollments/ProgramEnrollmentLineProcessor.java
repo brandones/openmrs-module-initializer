@@ -2,15 +2,15 @@ package org.openmrs.module.initializer.api.programenrollments;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.ISODateTimeFormat;
-import org.openmrs.Encounter;
-import org.openmrs.EncounterType;
-import org.openmrs.Form;
+import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.Patient;
-import org.openmrs.api.EncounterService;
-import org.openmrs.api.FormService;
+import org.openmrs.PatientProgram;
+import org.openmrs.Program;
+import org.openmrs.api.ConceptService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
+import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.initializer.api.BaseLineProcessor;
 import org.openmrs.module.initializer.api.CsvLine;
@@ -18,82 +18,103 @@ import org.joda.time.format.DateTimeFormatter;
 
 import java.util.Date;
 
-public class ProgramEnrollmentLineProcessor extends BaseLineProcessor<Encounter, EncounterService> {
+public class ProgramEnrollmentLineProcessor extends BaseLineProcessor<PatientProgram, ProgramWorkflowService> {
 	
-	public static final String HEADER_DATE = "Date";
+	public static final String HEADER_DATE_ENROLLED = "Date Enrolled";
 	
-	public static final String HEADER_PT_UUID = "Patient UUID";
+	public static final String HEADER_DATE_COMPLETED = "Date Completed";
 	
-	public static final String HEADER_LOCATION = "Location";
+	public static final String HEADER_PERSON_UUID = "Person UUID";
 	
-	public static final String HEADER_ENCOUNTER_TYPE = "Encounter Type";
+	public static final String HEADER_PROGRAM_NAME = "Program Name";
 	
-	public static final String HEADER_FORM_UUID = "Form UUID"; // optional
+	public static final String HEADER_LOCATION = "Location"; // optional
 	
-	private FormService formService;
+	public static final String HEADER_OUTCOME = "Outcome Concept"; // optional
 	
-	public ProgramEnrollmentLineProcessor(String[] headerLine, EncounterService es) {
-		super(headerLine, es);
-		formService = Context.getFormService();
+	public ProgramEnrollmentLineProcessor(String[] headerLine, ProgramWorkflowService pws) {
+		super(headerLine, pws);
 	}
 	
 	@Override
-	protected Encounter bootstrap(CsvLine line) throws IllegalArgumentException {
+	protected PatientProgram bootstrap(CsvLine line) throws IllegalArgumentException {
 		String uuid = getUuid(line.asLine());
-		Encounter enc = service.getEncounterByUuid(uuid);
+		PatientProgram pp = service.getPatientProgramByUuid(uuid);
 		
-		if (enc == null) {
-			enc = new Encounter();
+		if (pp == null) {
+			pp = new PatientProgram();
 			if (!StringUtils.isEmpty(uuid)) {
-				enc.setUuid(uuid);
+				pp.setUuid(uuid);
 			}
 		}
 		
-		enc.setVoided(getVoidOrRetire(line.asLine()));
+		pp.setVoided(getVoidOrRetire(line.asLine()));
 		
-		return enc;
+		return pp;
 	}
 	
 	@Override
-	protected Encounter fill(Encounter enc, CsvLine line) throws IllegalArgumentException {
+	protected PatientProgram fill(PatientProgram pp, CsvLine line) throws IllegalArgumentException {
 		DateTimeFormatter parser = ISODateTimeFormat.dateTimeNoMillis();
-		String dateString = line.get(HEADER_DATE, true);
-		Date date = parser.parseDateTime(dateString).toDate();
-		enc.setEncounterDatetime(date);
+		String enrolledDateString = line.get(HEADER_DATE_ENROLLED, true);
+		Date enrolledDate = parser.parseDateTime(enrolledDateString).toDate();
+		pp.setDateEnrolled(enrolledDate);
+		String completedDateString = line.get(HEADER_DATE_COMPLETED);
+		if (completedDateString != null && !completedDateString.isEmpty()) {
+			Date completedDate = parser.parseDateTime(completedDateString).toDate();
+			pp.setDateCompleted(completedDate);
+		}
 		
 		PatientService ps = Context.getPatientService();
-		String ptUuid = line.getString(HEADER_PT_UUID);
+		String ptUuid = line.get(HEADER_PERSON_UUID, true);
 		Patient pt = ps.getPatientByUuid(ptUuid);
 		if (pt == null) {
 			throw new IllegalArgumentException("No patient exists with UUID " + ptUuid);
 		}
-		enc.setPatient(pt);
+		pp.setPatient(pt);
 		
-		LocationService ls = Context.getLocationService();
+		String programNameString = line.get(HEADER_PROGRAM_NAME, true);
+		Program program = service.getProgramByName(programNameString);
+		if (program == null) {
+			throw new IllegalArgumentException("No program named " + programNameString + " exists");
+		}
+		pp.setProgram(program);
+		
 		String locationString = line.getString(HEADER_LOCATION);
-		Location loc = ls.getLocation(locationString);
-		if (loc == null) {
-			throw new IllegalArgumentException("No location named " + locationString + " exists");
-		}
-		enc.setLocation(loc);
-		
-		String encounterTypeString = line.getString(HEADER_ENCOUNTER_TYPE);
-		EncounterType et = service.getEncounterType(encounterTypeString);
-		if (et == null) {
-			throw new IllegalArgumentException("No Encounter Type named " + encounterTypeString + " exists");
-		}
-		enc.setEncounterType(et);
-		
-		String formUuidString = line.getString(HEADER_FORM_UUID);
-		if (formUuidString != null && !formUuidString.isEmpty()) {
-			Form form = formService.getFormByUuid(formUuidString);
-			if (form == null) {
-				throw new IllegalArgumentException("No Form exists with UUID " + formUuidString);
+		if (locationString != null && !locationString.isEmpty()) {
+			LocationService ls = Context.getLocationService();
+			Location loc = ls.getLocation(locationString);
+			if (loc == null) {
+				throw new IllegalArgumentException("No location named " + locationString + " exists");
 			}
-			enc.setForm(form);
+			pp.setLocation(loc);
 		}
 		
-		return enc;
+		String outcomeString = line.get(HEADER_OUTCOME);
+		if (outcomeString != null && !outcomeString.isEmpty()) {
+			ConceptService cs = Context.getConceptService();
+			Concept outcome = lookupConcept(cs, outcomeString);
+			if (outcome == null) {
+				throw new IllegalArgumentException("Invalid " + HEADER_OUTCOME + ". Should be either a Concept Name "
+				        + "in the current preferred locale or a Concept Reference Term like 'CIEL:12345'");
+			}
+			pp.setOutcome(outcome);
+		}
+		
+		return pp;
+	}
+	
+	private Concept lookupConcept(ConceptService cs, String refTermOrName) {
+		if (refTermOrName.contains(":")) {
+			String[] termSourceAndTerm = refTermOrName.split(":");
+			if (termSourceAndTerm.length != 2) {
+				throw new IllegalArgumentException("Concept Reference Terms should be specified like 'Term Source:Code'");
+			} else {
+				return cs.getConceptByMapping(termSourceAndTerm[1], termSourceAndTerm[0]);
+			}
+		} else {
+			return cs.getConceptByName(refTermOrName);
+		}
 	}
 	
 }

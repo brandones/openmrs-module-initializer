@@ -43,6 +43,7 @@ public class InitializerActivator extends BaseModuleActivator {
 		iniz.loadPersons();
 		iniz.loadEncounters();
 		iniz.loadObservations();
+		iniz.loadProgramEnrollments();
 		
 		log.info("Started " + InitializerConstants.MODULE_NAME);
 	}

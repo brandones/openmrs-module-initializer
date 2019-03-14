@@ -3,6 +3,7 @@ package org.openmrs.module.initializer.api;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.openmrs.Program;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
 import org.openmrs.module.initializer.InitializerConstants;
@@ -16,6 +17,7 @@ import org.openmrs.module.initializer.api.obs.ObsCsvParser;
 import org.openmrs.module.initializer.api.patients.PatientsCsvParser;
 import org.openmrs.module.initializer.api.pat.PersonAttributeTypesCsvParser;
 import org.openmrs.module.initializer.api.persons.PersonCsvParser;
+import org.openmrs.module.initializer.api.programenrollments.ProgramEnrollmentsCsvParser;
 
 /**
  * Use this class to create a CSV parser based on a domain.
@@ -67,7 +69,11 @@ public class CsvParserFactory {
 			return new PersonCsvParser(is, Context.getPersonService());
 		}
 		
-		throw new IllegalArgumentException("'" + domain
-		        + "' did not point to any identified CSV parser to process the input stream.");
+		if (InitializerConstants.DOMAIN_PROGRAM_ENROLLMENTS.equals(domain)) {
+			return new ProgramEnrollmentsCsvParser(is, Context.getProgramWorkflowService());
+		}
+		
+		throw new IllegalArgumentException(
+		        "'" + domain + "' did not point to any identified CSV parser to process the input stream.");
 	}
 }

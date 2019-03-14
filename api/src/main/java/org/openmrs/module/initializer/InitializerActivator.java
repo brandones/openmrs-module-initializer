@@ -41,6 +41,8 @@ public class InitializerActivator extends BaseModuleActivator {
 		
 		iniz.loadPatients();
 		iniz.loadPersons();
+		iniz.loadEncounters();
+		
 		log.info("Started " + InitializerConstants.MODULE_NAME);
 	}
 	

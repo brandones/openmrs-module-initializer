@@ -60,12 +60,9 @@ public class DomainObsInitializerServiceTest extends DomainBaseModuleContextSens
 		
 		// an obs to edit
 		// NB: obs are special because obsService doesn't update existing obs rows with
-		// new data.
-		// Rather, it voids the old row and creates a new row. The new row has a new
-		// UUID. Thus,
-		// while we "edit" the obs by referring to it by UUID in the CSV file, we have
-		// to look
-		// it up later by other means.
+		// new data. Rather, it voids the old row and creates a new row. The new row
+		// has a new UUID. Thus, while we "edit" the obs by referring to it by UUID in
+		// the CSV file, we have to look it up later by other means.
 		{
 			Date dt = new DateTime(2018, 3, 1, 12, 0, 0, DateTimeZone.UTC).toDate();
 			Obs o = new Obs(pt, booleanConcept, dt, xanadu);

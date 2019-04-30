@@ -85,7 +85,20 @@ public class DomainPersonInitializerServiceTest extends DomainBaseModuleContextS
 			Date birthdate = new GregorianCalendar(1980, Calendar.FEBRUARY, 1).getTime();
 			Assert.assertEquals(birthdate, pt.getBirthdate());
 			Assert.assertThat(pt.getBirthdateEstimated(), is(false));
-			Assert.assertEquals("The Shire", pt.getAddresses().iterator().next().getCityVillage());
+			Assert.assertEquals(2, pt.getAddresses().size());
+			PersonAddress shireAddress = null;
+			PersonAddress nzAddress = null;
+			for (PersonAddress address : pt.getAddresses()) {
+			    if (address.getCityVillage().equals("The Shire")) {
+			    	shireAddress = address;
+				} else if (address.getCityVillage().equals("Hinuera")) {
+			    	nzAddress = address;
+				}
+			}
+			Assert.assertNotNull(shireAddress);
+			Assert.assertEquals("Bag End", shireAddress.getAddress1());
+			Assert.assertNotNull(nzAddress);
+			Assert.assertEquals("NZ", nzAddress.getCountry());
 		}
 		// Verify creation of Meriadoc (Mary), who has no optional data
 		{

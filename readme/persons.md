@@ -1,7 +1,7 @@
 ## Data Import: Domain 'persons'
 The **persons** subfolder contains CSV import files for saving persons in bulk. This is a possible example of its content:
 ```bash
-data_import/
+import_data/
   └──persons/
     ├──persons.csv
     └── ...

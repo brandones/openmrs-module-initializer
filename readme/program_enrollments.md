@@ -3,7 +3,7 @@ The **programenrollments** subfolder contains CSV import files for saving progra
 in bulk. This is a possible example of its contents:
 
 ```bash
-data_import/
+import_data/
   └──programenrollments/
     ├──programenrollments.csv
     └── ...

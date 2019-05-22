@@ -6,9 +6,9 @@ in bulk.
 visits for those encounters afterward. Instructions for doing so can be found
 [here](https://wiki.openmrs.org/display/docs/How+to+create+visits+for+preexisting+encounters).
 
-This is a possible example of content of the `data_import/encounters` folder.
+This is a possible example of content of the `import_data/encounters` folder.
 ```bash
-data_import/
+import_data/
   └──encounters/
     ├──encounters.csv
     └── ...

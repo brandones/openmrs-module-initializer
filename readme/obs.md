@@ -3,7 +3,7 @@ The **obs** subfolder contains CSV import files for saving observations
 in bulk. This is a possible example of its contents:
 
 ```bash
-data_import/
+import_data/
   └──obs/
     ├──obs.csv
     └── ...

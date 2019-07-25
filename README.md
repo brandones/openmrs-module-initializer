@@ -110,12 +110,14 @@ generation algorithm is deterministic and unlikely to change for a particular
 entity. Otherwise you'll probably have to wipe the database and reload from
 scratch.
 
-An example application for transforming data using R is
-[this one](https://github.com/PIH/ces-data-migration),
-which was built for PIH Mexico. It may be a helpful reference if you're
-thinking of doing the transformation programatically.
+An example application for transforming data programatically is
+[this one](https://github.com/PIH/ces-data-migration), which was
+built in R for PIH Mexico. It may be a helpful reference if you're
+thinking of doing the transformation programatically; however, having
+written that, I would strongly recommend against using R for this, in
+favor of something like Python with Pandas.
 
-With an Intel Core i7-8550U, DDR4 RAM, and an SSD, patients were loaded at
+With an Intel Core i7-8550U, 16GB DDR4 RAM, and an SSD, patients were loaded at
 a rate of 10-14 per second. Encounters and observations were each loaded at
 rates of about 100 per second. Your mileage may vary.
 

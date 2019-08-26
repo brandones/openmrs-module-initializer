@@ -191,6 +191,19 @@ public class DomainObsInitializerServiceTest extends DomainBaseModuleContextSens
 			Obs o = editObsMatches.get(0);
 			Assert.assertEquals(false, o.getValueBoolean());
 		}
+		// Check dupe
+		{
+			getService().loadObservations();
+			List<Obs> dupeObsMatches = os.getObservations(Arrays.asList((Person) ps.getPatient(7)), null,
+			    Arrays.asList(cs.getConcept(20)), null, null, null, null, null, null,
+			    new DateTime(2019, 1, 1, 0, 0, 0, DateTimeZone.UTC).toDate(),
+			    new DateTime(2019, 1, 3, 0, 0, 0, DateTimeZone.UTC).toDate(), false);
+			Assert.assertEquals(1, dupeObsMatches.size());
+			// This would be nice, but isn't currently the case -- dupes are voided and
+			// re-created.
+			// Assert.assertEquals("d346cd50-1506-4677-8f00-258cbbaa8d4f",
+			// dupeObsMatches.get(0).getUuid());
+		}
 		// Verif retire
 		{
 			Obs o = os.getObsByUuid("c87f104b-87c6-4b1d-a5fb-a951adad25c0");

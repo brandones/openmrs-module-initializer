@@ -47,6 +47,7 @@ public class EncounterLineProcessor extends BaseLineProcessor<Encounter, Encount
 			if (!StringUtils.isEmpty(uuid)) {
 				enc.setUuid(uuid);
 			}
+			log.warn("Creating new Encounter for UUID " + uuid + " in " + line.getString(HEADER_LOCATION));
 		}
 		
 		enc.setVoided(getVoidOrRetire(line.asLine()));

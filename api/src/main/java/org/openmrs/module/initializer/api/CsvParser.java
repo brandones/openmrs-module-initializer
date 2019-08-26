@@ -57,8 +57,10 @@ public abstract class CsvParser<T extends BaseOpenmrsObject, S extends OpenmrsSe
 		headerLine = reader.readNext();
 		String version = P.getVersion(headerLine);
 		setLineProcessors(version, headerLine);
-		Logger logger = LogManager.getLogger(CsvParser.class); // TODO: **DEBUG** (remove me)
-		logger.setLevel(Level.DEBUG); // TODO: **DEBUG** (remove me)
+		Logger csvParserLogger = LogManager.getLogger(CsvParser.class); // TODO: **DEBUG** (remove me)
+		csvParserLogger.setLevel(Level.DEBUG); // TODO: **DEBUG** (remove me)
+		Logger configDirLogger = LogManager.getLogger(ConfigDirUtil.class); // TODO: **DEBUG** (remove me)
+		configDirLogger.setLevel(Level.DEBUG); // TODO: **DEBUG** (remove me)
 	}
 	
 	/**
